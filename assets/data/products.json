@@ -1,4 +1,3 @@
-
 {
   "categories": [
     "Resin",
@@ -8,25 +7,16 @@
   ],
   "products": [
     {
-      "id": "resin-desk-art",
-      "name": "Resin Desk Art",
-      "category": "Resin",
-      "description": "Minimal resin-crafted desk art piece designed for modern workspaces.",
-      "image": "assets/images/resin1.jpg"
-    },
-    {
-      "id": "wooden-organizer",
-      "name": "Wooden Desk Organizer",
-      "category": "Wood",
-      "description": "Ergonomic wooden organizer crafted with precision and balance.",
-      "image": "assets/images/wood1.jpg"
-    },
-    {
-      "id": "custom-build",
-      "name": "Custom Physical Product",
-      "category": "Custom",
-      "description": "Fully custom-built product tailored to functional and aesthetic needs.",
-      "image": "assets/images/custom1.jpg"
+      "id": "1768924763346",
+      "name": "Pen Holder",
+      "category": "wood",
+      "type": "physical",
+      "price": 499,
+      "status": "live",
+      "images": [
+        "assets/images/1pc Wooden Pen Holder.jpg\""
+      ],
+      "description": "delivery included"
     }
   ]
 }
