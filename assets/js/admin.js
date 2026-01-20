@@ -1,12 +1,7 @@
-/* =====================================================
-RESSINIQ ADMIN — SINGLE SOURCE OF TRUTH
-FULL CMS CONTROL • NO HTML/CSS CHANGES
-===================================================== */
-
 const PASSWORD = "ressiniq-admin";
 
 /* =========================
-STATE
+STATE (SINGLE SOURCE)
 ========================= */
 let db = {
   categories: [
@@ -25,7 +20,9 @@ loginBtn.onclick = () => {
   if (adminPassword.value === PASSWORD) {
     sessionStorage.setItem("admin-auth", "true");
     init();
-  } else alert("Wrong password");
+  } else {
+    alert("Wrong password");
+  }
 };
 
 logoutBtn.onclick = () => {
@@ -50,7 +47,13 @@ STORAGE
 ========================= */
 function loadDB() {
   const saved = localStorage.getItem("ressiniq-cms-db");
-  if (saved) db = JSON.parse(saved);
+  if (saved) {
+    try {
+      db = JSON.parse(saved);
+    } catch {
+      localStorage.removeItem("ressiniq-cms-db");
+    }
+  }
 }
 
 function saveDB() {
@@ -58,15 +61,16 @@ function saveDB() {
 }
 
 /* =========================
-RENDER
+RENDER ALL
 ========================= */
 function renderAll() {
   renderCategorySelect();
+  renderCategoryList();
   renderProductList();
 }
 
 /* =========================
-CATEGORIES — FULL CONTROL
+CATEGORIES
 ========================= */
 function renderCategorySelect() {
   productCategory.innerHTML = "";
@@ -78,82 +82,106 @@ function renderCategorySelect() {
   });
 }
 
-window.manageCategories = () => {
-  let msg = "CATEGORIES:\n\n";
-  db.categories.forEach(c => (msg += `${c.id} → ${c.name}\n`));
-  msg += "\nType:\nadd:Name\nedit:id:New Name\ndel:id";
+function renderCategoryList() {
+  categoryList.innerHTML = "";
 
-  const input = prompt(msg);
-  if (!input) return;
+  db.categories.forEach(cat => {
+    const inUse = db.products.some(p => p.category === cat.id);
 
-  const [action, a, b] = input.split(":");
+    const row = document.createElement("div");
+    row.className = "admin-item";
 
-  if (action === "add" && a) {
-    const id = a.toLowerCase().replace(/\s+/g, "-");
-    if (db.categories.some(c => c.id === id)) return alert("Category exists");
-    db.categories.push({ id, name: a });
+    row.innerHTML = `
+      <div>
+        <strong>${cat.name}</strong>
+        <span class="muted">(${cat.id})</span>
+      </div>
+      <div>
+        <button onclick="renameCategory('${cat.id}')">Rename</button>
+        <button ${inUse ? "disabled" : ""} onclick="deleteCategory('${cat.id}')">
+          Delete
+        </button>
+      </div>
+    `;
+
+    categoryList.appendChild(row);
+  });
+}
+
+window.addCategory = () => {
+  const name = newCategoryName.value.trim();
+  if (!name) return;
+
+  const id = name.toLowerCase().replace(/\s+/g, "-");
+  if (db.categories.some(c => c.id === id)) {
+    alert("Category already exists");
+    return;
   }
 
-  if (action === "edit" && a && b) {
-    const cat = db.categories.find(c => c.id === a);
-    if (!cat) return alert("Not found");
-    cat.name = b;
+  db.categories.push({ id, name });
+  newCategoryName.value = "";
+  saveDB();
+  renderAll();
+};
+
+window.renameCategory = id => {
+  const cat = db.categories.find(c => c.id === id);
+  if (!cat) return;
+
+  const newName = prompt("Rename category", cat.name);
+  if (!newName) return;
+
+  cat.name = newName.trim();
+  saveDB();
+  renderAll();
+};
+
+window.deleteCategory = id => {
+  if (db.products.some(p => p.category === id)) {
+    alert("Category is in use");
+    return;
   }
 
-  if (action === "del" && a) {
-    if (db.products.some(p => p.category === a))
-      return alert("Category in use");
-    db.categories = db.categories.filter(c => c.id !== a);
-  }
-
+  db.categories = db.categories.filter(c => c.id !== id);
   saveDB();
   renderAll();
 };
 
 /* =========================
-PRODUCT LIST
+PRODUCTS
 ========================= */
 function renderProductList() {
   adminProducts.innerHTML = "";
 
   if (!db.products.length) {
-    adminProducts.innerHTML = "<p class='muted'>No products added.</p>";
+    adminProducts.innerHTML = "<p class='muted'>No products yet</p>";
     return;
   }
 
-  db.products.forEach((p, i) => {
+  db.products.forEach(p => {
     const div = document.createElement("div");
     div.className = "admin-item";
+
     div.innerHTML = `
       <div>
         <strong>${p.name}</strong><br>
-        <span class="muted">${p.category} · ${p.status}</span>
+        <span class="muted">
+          ${p.category} · ${p.type} · ${p.status}
+          ${p.price ? "· ₹" + p.price : ""}
+        </span>
       </div>
       <div>
-        <button onclick="moveProduct(${i},-1)">↑</button>
-        <button onclick="moveProduct(${i},1)">↓</button>
-        <button onclick="previewProduct('${p.id}')">Preview</button>
         <button onclick="editProduct('${p.id}')">Edit</button>
         <button onclick="deleteProduct('${p.id}')">Delete</button>
       </div>
     `;
+
     adminProducts.appendChild(div);
   });
 }
 
 /* =========================
-REORDER
-========================= */
-window.moveProduct = (i, dir) => {
-  const j = i + dir;
-  if (j < 0 || j >= db.products.length) return;
-  [db.products[i], db.products[j]] = [db.products[j], db.products[i]];
-  saveDB();
-  renderProductList();
-};
-
-/* =========================
-FORM SUBMIT — MULTI IMAGE SAFE
+FORM SUBMIT
 ========================= */
 productForm.onsubmit = e => {
   e.preventDefault();
@@ -168,15 +196,15 @@ productForm.onsubmit = e => {
     id: productId.value || Date.now().toString(),
     name: productName.value.trim(),
     category: productCategory.value,
+    type: productType.value,
+    price: productPrice.value ? Number(productPrice.value) : null,
     status: productStatus.value,
     images,
     description: productDescription.value.trim()
   };
 
-  if (!product.name) return alert("Name required");
-
-  const i = db.products.findIndex(p => p.id === product.id);
-  i >= 0 ? (db.products[i] = product) : db.products.push(product);
+  const index = db.products.findIndex(p => p.id === product.id);
+  index >= 0 ? (db.products[index] = product) : db.products.push(product);
 
   saveDB();
   productForm.reset();
@@ -185,7 +213,7 @@ productForm.onsubmit = e => {
 };
 
 /* =========================
-EDIT / DELETE
+EDIT / DELETE PRODUCT
 ========================= */
 window.editProduct = id => {
   const p = db.products.find(x => x.id === id);
@@ -194,6 +222,8 @@ window.editProduct = id => {
   productId.value = p.id;
   productName.value = p.name;
   productCategory.value = p.category;
+  productType.value = p.type;
+  productPrice.value = p.price || "";
   productStatus.value = p.status;
   productImages.value = p.images.join("\n");
   productDescription.value = p.description;
@@ -207,46 +237,14 @@ window.deleteProduct = id => {
 };
 
 /* =========================
-PREVIEW (PUBLIC CARD)
-========================= */
-window.previewProduct = id => {
-  const p = db.products.find(x => x.id === id);
-  if (!p) return;
-
-  const w = window.open("", "", "width=420,height=520");
-  w.document.body.style.fontFamily = "system-ui";
-  w.document.body.innerHTML = `
-    ${p.images[0] ? `<img src="${p.images[0]}" style="width:100%;border-radius:12px">` : ""}
-    <h3>${p.name}</h3>
-    <p>${p.category}</p>
-  `;
-};
-
-/* =========================
-EXPORT — VALIDATED & SAFE
+EXPORT
 ========================= */
 window.exportJSON = () => {
-  const errors = [];
-
-  db.products.forEach(p => {
-    if (!p.name) errors.push(`Missing name: ${p.id}`);
-    if (!p.category) errors.push(`Missing category: ${p.name}`);
-    if (!db.categories.find(c => c.id === p.category))
-      errors.push(`Invalid category: ${p.name}`);
-    if (p.images.some(i => i.includes(":\\")))
-      errors.push(`Invalid image path: ${p.name}`);
-  });
-
-  if (errors.length) {
-    alert("Fix before export:\n\n" + errors.join("\n"));
-    return;
-  }
-
-  const exportData = {
+  const output = {
     categories: db.categories.map(c => c.name),
     products: db.products
   };
 
-  navigator.clipboard.writeText(JSON.stringify(exportData, null, 2));
+  navigator.clipboard.writeText(JSON.stringify(output, null, 2));
   alert("Exported.\nPaste into assets/data/products.json");
 };

@@ -1,22 +1,44 @@
-<section class="product-page">
-  <div class="container product-layout">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product – RESSINIQ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
 
-    <div class="product-gallery">
-      <img id="mainImage" />
-      <div id="thumbnails" class="thumbnails"></div>
-    </div>
-
-    <div class="product-info">
-      <h1 id="productName"></h1>
-      <span id="featuredBadge" class="featured hidden">Featured</span>
-      <p class="muted" id="productCategory"></p>
-      <p id="productDescription"></p>
-
-      <div class="product-actions">
-        <a href="https://www.instagram.com/ressiniq/" class="btn primary">DM on Instagram</a>
-        <a href="mailto:ressiniq@gmail.com" class="btn ghost">Email</a>
-      </div>
-    </div>
-
+<header class="nav">
+  <div class="nav-inner">
+    <a href="products.html" class="logo">RESSINIQ</a>
+    <a href="cart.html" class="cart-link">
+      🛒 <span id="cartCount" class="cart-count hidden">0</span>
+    </a>
   </div>
-</section>
+</header>
+
+<main class="product-page">
+
+  <section class="product-gallery">
+    <img id="mainImage" class="main-image">
+    <div id="thumbnails" class="thumbnail-row"></div>
+  </section>
+
+  <section class="product-info">
+    <h1 id="productName"></h1>
+    <p class="muted" id="productCategory"></p>
+    <p class="price" id="productPrice"></p>
+    <p id="productDescription"></p>
+
+    <div class="product-actions">
+      <button id="addToCartBtn" class="btn primary">Add to Cart</button>
+      <button id="askQueryBtn" class="btn ghost">Ask a Query</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/product.js"></script>
+</body>
+</html>
