@@ -1,0 +1,63 @@
+<!-- =========================
+FILE: admin.html
+========================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — RESSINIQ</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="assets/css/style.css"/>
+</head>
+<body>
+
+<main class="admin-wrapper">
+  <!-- LOGIN -->
+  <section id="loginSection" class="admin-card">
+    <h1>Admin Access</h1>
+    <p class="muted">Restricted area. Authorized access only.</p>
+
+    <input type="password" id="adminPassword" placeholder="Enter admin password"/>
+    <button class="btn primary" id="loginBtn">Login</button>
+
+    <p class="warning">
+      ⚠ This admin panel is client-side only. Do NOT use sensitive passwords.
+    </p>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="admin-dashboard hidden">
+    <header class="admin-header">
+      <h2>Product Manager</h2>
+      <button class="btn ghost" id="logoutBtn">Logout</button>
+    </header>
+
+    <form id="productForm" class="admin-form">
+      <h3>Add / Edit Product</h3>
+
+      <input type="hidden" id="productId"/>
+
+      <input type="text" id="productName" placeholder="Product Name" required/>
+      <input type="text" id="productCategory" placeholder="Category" required/>
+      <input type="text" id="productImage" placeholder="Image path (assets/images/...)" required/>
+
+      <textarea id="productDescription" placeholder="Product description" required></textarea>
+
+      <button class="btn primary" type="submit">Save Product</button>
+    </form>
+
+    <div class="admin-list">
+      <h3>Existing Products</h3>
+      <div id="adminProducts"></div>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/admin.js"></script>
+</body>
+</html>
+
+<button onclick="exportJSON()" class="btn primary" style="margin-top:2rem;">
+  Export products.json
+</button>
